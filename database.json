@@ -1,0 +1,30 @@
+{
+  "stuff": [
+    {
+      "id": "c514",
+      "name": "Keyboard",
+      "price": "200",
+      "category": "Electronic"
+    },
+    {
+      "id": "8d37",
+      "name": "mouse",
+      "price": "2000",
+      "category": "Electronic"
+    }
+  ],
+  "category": [
+    {
+      "id": "c514",
+      "name": "Electronic"
+    },
+    {
+      "id": "1d01",
+      "name": "Food and Drink"
+    },
+    {
+      "id": "14d9",
+      "name": "test"
+    }
+  ]
+}

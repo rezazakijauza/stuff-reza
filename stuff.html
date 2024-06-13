@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        table,th,td{
+            border: 1px solid black;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<body>
+    <div>
+        <input type="text" placeholder="Name of stuff" id="name">
+        <input type="number" id="price" placeholder="Price of stuff">
+        <select id="category">
+            <option value="Furniture">Furniture</option>
+            <option value="Electronic">Electronic</option>
+        </select>
+        <button type="button" id="trigger" onclick="SaveStuff()">Save</button>
+    </div>
+    <table style="margin-top: 20px;">
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="result">
+            <tr>
+                <td colspan="5" align="center">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const UpdateStuff = async (id) => {
+            const nameVal = document.getElementById('name').value;
+            const priceVal = document.getElementById('price').value;
+            const categoryVal = document.getElementById('category').value;
+            await axios.patch(`http://localhost:3000/stuff/${id}`,{
+                name:nameVal,
+                price:priceVal,
+                category:categoryVal,
+            })
+            .then((response) =>{
+                console.log(response);
+                document.getElementById('name').value = '';
+                document.getElementById('price').value = '';
+                document.getElementById('trigger').innerText="Save";
+                document.getElementById('trigger').setAttribute('onclick',`SaveStuff()`)
+                alert('Berhasil Diupdate')
+                GetStuff();
+            })
+            .catch((error) =>{
+                alert('Maaf Server sedang Offline');
+            })
+        }
+
+        const EditStuff = async (id) => {
+            await axios.get(`http://localhost:3000/stuff/${id}`)
+            .then((response)=>{
+                console.log(response.data);
+                const stuff = response.data;
+                document.getElementById('name').value = stuff.name;
+                document.getElementById('price').value = stuff.price;
+                document.getElementById('category').value = stuff.category;
+                document.getElementById('trigger').innerText="Update";
+                document.getElementById('trigger').setAttribute('onclick',`UpdateStuff('${id}')`)
+            })
+            .catch((error)=>{
+                console.log(error);
+            });
+        }
+
+        const GetStuff = async () => {
+            await axios.get('http://localhost:3000/stuff')
+            .then((response) => {
+                console.log(response);
+                const stuffs= response.data;
+                let bucket = "";
+                stuffs.forEach((stuff,index) => {
+                    bucket += `
+                    <tr>
+                        <td>${index+1}</td>
+                        <td>${stuff.name}</td>
+                        <td>${stuff.category}</td>
+                        <td>$${stuff.price}</td>
+                        <td>
+                            <button onclick="EditStuff('${stuff.id}')" type="button">Edit</button>
+                            <button onclick="DeleteStuff('${stuff.id}')" type="button">Delete</button>
+                        </td>
+                    </tr>
+                    ` 
+                });
+                document.getElementById('result').innerHTML=bucket;
+        
+            })
+            .catch((error) =>{
+                alert('Maaf Server sedang Offline');
+            })
+        }
+        GetStuff();
+
+        const DeleteStuff = async (id) => {
+            const confirmed = confirm('Apakah ini akan dihapus?');
+            if(confirmed){
+                await axios.delete(`http://localhost:3000/stuff/${id}`)
+            .then((response)=>{
+                console.log(response);                                
+                GetStuff();
+            })
+            .catch((error)=>{
+                console.log(error);
+            })
+            }   
+        }
+
+        const SaveStuff = async () =>{
+            const nameVal = document.getElementById('name').value;
+            const priceVal = document.getElementById('price').value;
+            const categoryVal = document.getElementById('category').value;
+             
+            await axios.post('http://localhost:3000/stuff',{
+                name:nameVal,
+                price:priceVal,
+                category:categoryVal,
+            })
+            .then((response) =>{
+                console.log(response);
+                alert('Berhasil disimpan')
+                GetStuff();
+            })
+            .catch((error) =>{
+                alert('Maaf Server sedang Offline');
+            })
+            
+        }
+
+        const GetCategory = async () => {
+        await axios
+          .get("http://localhost:3000/category")
+          .then((response) => {
+            console.log(response);
+            const categories = response.data;
+            let bucket = "";
+            categories.forEach((category, index) => {
+              bucket += `<option value="${category.name}">${category.name}</option>`;
+            });
+            document.getElementById("category").innerHTML = bucket;
+          })
+          .catch((error) => {
+            alert("Maaf Server sedang Offline");
+          });
+      };
+      GetCategory();
+    </script>
+</body>
+</html>
